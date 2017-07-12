@@ -55,7 +55,7 @@ function create() {
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
 
-    player = game.add.sprite(game.world.centerX, 700, 'ship');
+    player = game.add.sprite(game.world.centerX, game.world.height - 100, 'ship');
     player.anchor.setTo(0.5, 0.5);
     game.physics.enable(player, Phaser.Physics.ARCADE);
 
@@ -66,12 +66,12 @@ function create() {
     criarAliens();
 
     scoreString = 'Pontos : ';
-    scoreText = game.add.text(10, 730, scoreString + score, { font: '34px Arial', fill: '#FFD700' });
+    scoreText = game.add.text(10, game.world.height - 50, scoreString + score, { font: '34px Arial', fill: '#FFD700' });
 
     lives = game.add.group();
     game.add.text(game.world.width - 100, 10, 'Vidas', { font: '34px Arial', fill: '#FFD700' });
 	
-	secondText = game.add.text(game.world.width - 150, 730, 'Alvos: ' + seconds, { font: '34px Arial', fill: '#FFD700'});
+	secondText = game.add.text(game.world.width - 150, game.world.height - 50, 'Alvos: ' + seconds, { font: '34px Arial', fill: '#FFD700'});
 	
     stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '84px Arial', fill: '#fff' });
     stateText.anchor.setTo(0.5, 0.5);
