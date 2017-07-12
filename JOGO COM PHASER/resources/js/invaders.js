@@ -7,8 +7,8 @@ function preload() {
     game.load.image('enemyBullet', 'resources/img/enemy-bullet.png');
     game.load.spritesheet('invader', 'resources/img/inimigo.png', 82, 82);
     game.load.image('ship', 'resources/img/nave.png');
-    //game.load.spritesheet('kaboom', 'resources/img/explode.png', 128, 128);
-    game.load.image('starfield', 'resources/img/starfield.png');
+    game.load.spritesheet('kaboom', 'resources/img/explode.png', 128, 128);
+    game.load.image('starfield', 'resources/img/lactea.png');
     /*game.load.image('background', 'assets/games/starstruck/background2.png');*/
 
 }
@@ -29,6 +29,7 @@ var enemyBullet;
 var firingTimer = 0;
 var stateText;
 var livingEnemies = [];
+var seconds = 0;
 
 function create() {
 
@@ -65,15 +66,13 @@ function create() {
     criarAliens();
 
     scoreString = 'Pontos : ';
-    scoreText = game.add.text(10, 10, scoreString + score, { font: '34px Arial', fill: '#fff' });
+    scoreText = game.add.text(10, 730, scoreString + score, { font: '34px Arial', fill: '#FFD700' });
 
     lives = game.add.group();
-    game.add.text(game.world.width - 100, 10, 'Vidas', { font: '34px Arial', fill: '#fff' });
+    game.add.text(game.world.width - 100, 10, 'Vidas', { font: '34px Arial', fill: '#FFD700' });
 	
-	game.add.text(game.world.width - 110, 700, 'Tempo', { font: '34px Arial', fill: '#fff'});
+	secondText = game.add.text(game.world.width - 150, 730, 'Alvos: ' + seconds, { font: '34px Arial', fill: '#FFD700'});
 	
-	game.add.text(game.world.width - 100, 740, '00:00', { font: '34px Arial', fill: '#fff'});
-
     stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '84px Arial', fill: '#fff' });
     stateText.anchor.setTo(0.5, 0.5);
     stateText.visible = false;
@@ -95,14 +94,12 @@ function create() {
 
 function criarAliens () {
 
-    for (var y = 0; y < 5; y++)
+    for (var y = 0; y < 3; y++)
     {
-        for (var x = 0; x < 25; x++)
+        for (var x = 0; x < 17; x++)
         {
-            var alien = aliens.create(x * 48, y * 50, 'invader');
+            var alien = aliens.create(x * 70, y * 90, 'invader');
             alien.anchor.setTo(0.5, 0.5);
-            //alien.animations.add('fly', [ 0, 1, 2, 3 ], 20, true);
-            //alien.play('fly');
             alien.body.moves = false;
         }
     }
@@ -130,34 +127,45 @@ function descend() {
 }
 
 function update() {
-
-    starfield.tilePosition.y += 2;
+		
+	starfield.tilePosition.y += 2;
 
     if (player.alive)
     {
         player.body.velocity.setTo(0, 0);
+		
+		if (cursors.left.isDown)
+    {
+        player.x -= 4;
+        player.scale.x = -1;
+    }
+    else if (cursors.right.isDown)
+    {
+        player.x += 4;
+        player.scale.x = 1;
+    }
 
-        if (cursors.left.isDown)
-        {
-            player.body.velocity.x = -200;
-        }
-        else if (cursors.right.isDown)
-        {
-            player.body.velocity.x = 200;
-        }
+    if (cursors.up.isDown)
+    {
+        player.y -= 4;
+    }
+    else if (cursors.down.isDown)
+    {
+        player.y += 4;
+    }
 
-        if (fireButton.isDown)
-        {
-            fireBullet();
-        }
+    if (fireButton.isDown)
+    {
+        fireBullet();
+    }
 
-        if (game.time.now > firingTimer)
-        {
-            enemyFires();
-        }
+    if (game.time.now > firingTimer)
+    {
+        enemyFires();
+    }
 
-        game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
-        game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
+    game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
+    game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
     }
 
 }
@@ -170,14 +178,16 @@ function collisionHandler (bullet, alien) {
 
     bullet.kill();
     alien.kill();
-
+	
+	seconds += 1;
     score += 20;
+	secondText.text = "Alvos: " + seconds;
     scoreText.text = scoreString + score;
 
 	//@TODO - EXPLOSAO CASO FOR NECESSARIO
-    //var explosion = explosions.getFirstExists(false);
-    //explosion.reset(alien.body.x, alien.body.y);
-    //explosion.play('kaboom', 30, false, true);
+    var explosion = explosions.getFirstExists(false);
+    explosion.reset(alien.body.x, alien.body.y);
+    explosion.play('kaboom', 30, false, true);
 
     if (aliens.countLiving() == 0)
     {
@@ -264,11 +274,16 @@ function fireBullet () {
 }
 
 function resetBullet (bullet) {
-    bullet.kill();
+    seconds = 0;
+	bullet.kill();
 }
 
 function restart () {
-
+	
+	seconds = 0;
+    score = 0;
+	secondText.text = "Alvos: " + seconds;
+    scoreText.text = scoreString + score;
     lives.callAll('revive');
     aliens.removeAll();
     criarAliens();
